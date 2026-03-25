@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+    <name>DockerHost</name>
+    <author>Agent Zero</author>
+    <creationDate>2026-03-24</creationDate>
+    <version>1.2.0</version>
+    <description>Docker Container Hosting Component with SSL Support</description>
+    <namespace path="src">Joomla\Component\Dockerhost</namespace>
+
+    <!-- Site (Frontend) -->
+    <files folder="site">
+        <folder>src</folder>
+        <folder>tmpl</folder>
+        <folder>services</folder>
+    </files>
+
+    <!-- Admin (Backend) -->
+    <administration>
+        <menu>DockerHost</menu>
+        <submenu>
+            <menu link="option=com_dockerhost&amp;view=containers">Containers</menu>
+            <menu link="option=com_dockerhost&amp;view=deploy">Deploy</menu>
+            <menu link="option=com_dockerhost&amp;view=images">Images</menu>
+            <menu link="option=com_dockerhost&amp;view=settings">Settings</menu>
+        </submenu>
+        <files folder="admin">
+            <folder>services</folder>
+            <folder>sql</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+    </administration>
+
+    <install>
+        <sql><file driver="mysql" charset="utf8">sql/install.mysql.sql</file></sql>
+    </install>
+    <uninstall>
+        <sql><file driver="mysql" charset="utf8">sql/uninstall.mysql.sql</file></sql>
+    </uninstall>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="api_url" type="text" default="http://127.0.0.1:7001"
+                       label="Docker API URL" description="URL of the DockerHost API service" />
+                <field name="api_token" type="text" default="dockerhost-secret-token-2026"
+                       label="API Token" description="Bearer token for API authentication" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

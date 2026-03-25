@@ -1,0 +1,26 @@
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
