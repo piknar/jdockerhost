@@ -267,6 +267,8 @@ Contributions welcome! Please:
 
 ## 📄 License
 
+This project is licensed under the GNU General Public License v2.0 or later - see https://www.gnu.org/licenses/gpl-2.0.html for details.
+
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
