@@ -30,6 +30,7 @@ def verify_token(authorization: Optional[str] = Header(None)):
 # ---- Models ----
 
 class DeployRequest(BaseModel):
+    # Container details
     name: str
     image: str
     port: Optional[int] = None
@@ -37,6 +38,9 @@ class DeployRequest(BaseModel):
     env_vars: Optional[dict] = {}       # legacy dict format
     restart_policy: Optional[str] = "unless-stopped"
     subdomain: Optional[str] = None
+    # User tracking for multi-user support
+    user_id: Optional[int] = None
+    username: Optional[str] = None
 
 class PullRequest(BaseModel):
     image: str
