@@ -105,7 +105,7 @@ $sslBase = 'https://jtest.ymmude.com';
                         <?php endif; ?>
                     </p>
                     
-                    <?php if ($sslUrl || $directUrl): ?>
+                    <?php if ($sslUrl): ?>
                     <div class="mt-3">
                         <small class="text-muted d-block mb-2">Access URLs:</small>
                         <?php if ($sslUrl): ?>
@@ -113,10 +113,6 @@ $sslBase = 'https://jtest.ymmude.com';
                             <i class="fas fa-lock me-1"></i>Open (SSL)
                         </a>
                         <?php endif; ?>
-                        <?php if ($directUrl): ?>
-                        <a href="<?php echo htmlspecialchars($directUrl); ?>" target="_blank" class="btn btn-outline-secondary btn-sm w-100">
-                            <i class="fas fa-link me-1"></i>Direct Link
-                        </a>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
