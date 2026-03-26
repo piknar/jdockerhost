@@ -6,7 +6,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
 
 $token = \Joomla\CMS\Session\Session::getFormToken();
-$serverIp = '168.231.72.66';
+$serverIp = 'jtest.ymmude.com';
+$sslBase = 'https://jtest.ymmude.com';
 ?>
 
 <div class="dockerhost-dashboard">
@@ -68,7 +69,7 @@ $serverIp = '168.231.72.66';
             $isUp = str_contains(strtolower($state), 'running') || str_contains(strtolower($state), 'up');
             $labels = (array)($c['labels'] ?? []);
             $sslPort = $labels['ssl_port'] ?? '';
-            $sslUrl = $sslPort ? 'https://ymmude.com:' . (int)$sslPort : '';
+            $sslUrl = $sslPort ? 'https://jtest.ymmude.com:' . (int)$sslPort : '';
             
             // Get direct URL
             $directUrl = '';
@@ -78,7 +79,7 @@ $serverIp = '168.231.72.66';
                     if (!empty($bindings) && is_array($bindings)) {
                         $hostPort = $bindings[0]['HostPort'] ?? null;
                         if ($hostPort) {
-                            $directUrl = "http://{$serverIp}:{$hostPort}";
+                            $directUrl = "https://jtest.ymmude.com:{$hostPort}";
                             break;
                         }
                     }
