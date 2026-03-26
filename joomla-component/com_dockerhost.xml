@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" method="upgrade">
     <name>DockerHost</name>
-    <author>Agent Zero</author>
+    <author>ymmude</author>
     <creationDate>2026-03-24</creationDate>
     <version>1.2.0</version>
     <description>Docker Container Hosting Component with SSL Support</description>
