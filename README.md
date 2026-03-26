@@ -1,282 +1,163 @@
-# DockerHost
+# DockerHost for Joomla 6
 
-**Docker Container Hosting for Joomla 6**
+[![Joomla 6](https://img.shields.io/badge/Joomla-6.1+-5091AD?style=flat&logo=joomla)](https://www.joomla.org/)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)](https://www.php.net/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-GPL--2.0+-green.svg)](LICENSE)
 
-[![Joomla](https://img.shields.io/badge/Joomla-6.0-blue.svg)](https://www.joomla.org/)
-[![PHP](https://img.shields.io/badge/PHP-8.2+-purple.svg)](https://php.net/)
-[![Docker](https://img.shields.io/badge/Docker-24.0+-2496ED?logo=docker)](https://docker.com/)
+**Multi-user Docker container hosting integrated with Joomla 6.** Deploy, manage, and access containerized applications with automatic SSL provisioning.
 
-A complete Docker container management system integrated with Joomla 6. Deploy, manage, and access containers through an elegant web interface with automatic SSL provisioning.
+## 🎯 Overview
 
-![Architecture](https://img.shields.io/badge/Architecture-MVC-orange)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+DockerHost transforms Joomla into a container hosting platform. Users can deploy Docker containers directly from the admin interface, with each container automatically configured for SSL access on dedicated ports.
 
----
-
-## ✨ Features
-
-### 🔧 Admin Backend (Administrator)
-- 📦 **Deploy Containers** - One-click deployment with custom images
-- 🎛️ **Container Management** - Start, stop, restart, delete containers
-- 🖼️ **Image Management** - Pull and manage Docker images
-- 📊 **View Logs** - Real-time container logs
-- ⚙️ **Settings** - Configure API endpoint and authentication
-
-### 🌐 Port-Based SSL System
-- 🔒 **Automatic SSL** - Containers accessible via HTTPS on dedicated ports (9001-9100)
-- 🚀 **WebSocket Support** - Full support for real-time applications
-- 📝 **No DNS Required** - Uses main domain SSL certificate
-
-### 👥 Multi-User Support
-- 🔐 **User Ownership** - Containers tagged with owner user ID
-- 🔍 **Filtered Views** - Users see only their own containers
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        VPS / Server                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────┐    ┌─────────────────────────────┐   │
-│  │  Joomla 6 (PHP)  │    │  DockerHost API Service     │   │
-│  │  jtest.ymmude.com│───▶│  Python FastAPI             │   │
-│  │                  │    │  http://127.0.0.1:7001      │   │
-│  │  - Admin Backend │    │                             │   │
-│  │  - Settings      │    │  - Container lifecycle      │   │
-│  │  - Deploy Forms  │    │  - Image management         │   │
-│  └──────────────────┘    │  - SSL port allocation      │   │
-│                          └─────────────┬───────────────┘   │
-│                                        │                    │
-│                                        ▼                    │
-│                          ┌─────────────────────────────┐   │
-│                          │     Docker Engine           │   │
-│                          │     /var/run/docker.sock    │   │
-│                          └─────────────────────────────┘   │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              nginx SSL Port Proxies                   │   │
-│  │  https://your-domain.com:9001 ──▶ container:8080     │   │
-│  │  https://your-domain.com:9002 ──▶ container:XXXX     │   │
-│  │  (ports 9001-9100 range)                             │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📋 Requirements
-
-### Server Requirements
-- **Joomla 6.0+**
-- **PHP 8.2+** with extensions: `sodium`, `intl`, `mbstring`, `curl`, `json`, `pdo_mysql`
-- **fsockopen enabled** (must NOT be in `disable_functions`)
-- **Docker Engine 24.0+**
-- **nginx 1.18+**
-- **Python 3.10+** with FastAPI
-
-### Ports
-- `443` - Main HTTPS
-- `7001` - DockerHost API (internal)
-- `9001-9100` - Container SSL ports (must be opened in firewall)
-
----
-
-## 🚀 Installation
-
-### Step 1: Install DockerHost API Service
-
-```bash
-# Install Python dependencies
-pip install fastapi uvicorn docker python-dotenv
-
-# Deploy API service
-cp dockerhost-api/main.py /opt/dockerhost-api/
-cp dockerhost-api/requirements.txt /opt/dockerhost-api/
-
-# Create systemd service
-cat > /etc/systemd/system/dockerhost-api.service << 'SERVICE'
-[Unit]
-Description=DockerHost API Service
-After=docker.service
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/dockerhost-api
-ExecStart=/usr/bin/python3 /opt/dockerhost-api/main.py
-Restart=always
-Environment="DOCKERHOST_TOKEN=your-secure-token"
-
-[Install]
-WantedBy=multi-user.target
-SERVICE
-
-systemctl enable --now dockerhost-api
-```
-
-### Step 2: Install Joomla Component
-
-1. Download `com_dockerhost.zip` from [Releases](../../releases)
-2. Go to **Joomla Administrator → Extensions → Install → Upload Package File**
-3. Upload and install `com_dockerhost.zip`
-
-### Step 3: Configure API Settings
-
-1. Go to **Components → DockerHost → Settings**
-2. Set API URL: `http://127.0.0.1:7001`
-3. Set API Token: (same as DOCKERHOST_TOKEN above)
-
-### Step 4: Configure nginx SSL
-
-```bash
-mkdir -p /etc/nginx/conf.d/dockerhost-includes/
-```
-
-Add to your main nginx config:
-```nginx
-include /etc/nginx/conf.d/dockerhost-includes/*.conf;
-```
-
----
-
-## 📝 Usage
-
-### Deploy a Container
-
-1. Go to **Components → DockerHost → Deploy**
-2. Fill in:
-   - **Container Name**: `my-app`
-   - **Docker Image**: `nginx:latest`
-   - **Container Port**: `80`
-   - **Restart Policy**: `unless-stopped`
-3. (Optional) Add environment variables
-4. Click **Deploy**
-
-### Access Container via SSL
-
-After deployment, your container will be accessible at:
-```
-https://your-domain.com:9001
-```
-
-The port (9001-9100) is automatically assigned and configured with SSL.
-
-### Manage Containers
-
-Go to **Components → DockerHost → Containers** to:
-- Start / Stop / Restart containers
-- View container status and ports
-- Delete containers
-- View container logs
-
----
-
-## 🔧 API Endpoints
-
-The DockerHost API provides REST endpoints for container management:
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | API health check |
-| `/containers` | GET | List all containers |
-| `/containers/deploy` | POST | Deploy new container |
-| `/containers/{id}/start` | POST | Start container |
-| `/containers/{id}/stop` | POST | Stop container |
-| `/containers/{id}/restart` | POST | Restart container |
-| `/images` | GET | List Docker images |
-| `/images/pull` | POST | Pull new image |
-| `/ssl/create` | POST | Create SSL port proxy |
-| `/ssl/list` | GET | List SSL port mappings |
-
-**Authentication:** Bearer token via `Authorization: Bearer <token>` header
-
----
+**Key Features:**
+- 🔐 **Automatic SSL** - Containers get HTTPS via nginx on ports 9001-9100
+- 👥 **Multi-user** - Containers tagged with user_id/username ownership
+- 🚀 **One-click deploy** - Web interface for container lifecycle
+- 📊 **Admin dashboard** - Full CRUD management
+- 👁️ **Frontend view** - Read-only container status for users
 
 ## 📁 Project Structure
 
 ```
-dockerhost/
-├── joomla-component/          # Joomla MVC component
+dockerhost-repo/
+├── joomla-component/          # Joomla MVC Component
 │   ├── admin/                 # Administrator backend
-│   │   ├── src/
-│   │   │   ├── Controller/    # Admin controllers
-│   │   │   ├── Model/         # Admin models
-│   │   │   ├── View/          # Admin views
-│   │   │   ├── Helper/        # ApiHelper
-│   │   │   └── Extension/     # Component extension
-│   │   └── tmpl/              # Admin templates
-│   ├── site/                  # Frontend (user dashboard)
-│   │   └── src/
-│   │       └── # Site views, controllers, models
+│   │   ├── src/Controller/    # Deploy, containers, images, logs controllers
+│   │   ├── src/Model/         # Business logic
+│   │   ├── src/View/          # HTML views
+│   │   └── tmpl/              # Templates (deploy, containers, etc.)
+│   ├── site/                  # Frontend (read-only)
+│   │   ├── src/Controller/    # Dashboard, containers controllers
+│   │   ├── src/Model/         # Dashboard model with API integration
+│   │   └── tmpl/dashboard/    # Frontend template
 │   └── com_dockerhost.xml     # Component manifest
-│
-├── dockerhost-api/            # Python FastAPI service
-│   ├── main.py               # API server code
-│   └── requirements.txt      # Python dependencies
-│
+├── dockerhost-api/            # Python FastAPI Service
+│   ├── main.py                # API endpoints for Docker operations
+│   ├── requirements.txt       # Python dependencies
+│   └── .env                   # Configuration (API token, paths)
 └── docs/
-    └── DOCKERHOST_DOCUMENTATION.md  # Full documentation
+    └── DOCKERHOST_DOCUMENTATION.md  # Full technical documentation
 ```
 
----
+## 🏗️ Architecture
 
-## 🐛 Troubleshooting
-
-### CSRF Token Errors
-Ensure `format=json` is included in all AJAX requests.
-
-### 502 Bad Gateway
-Check Docker API service is running:
-```bash
-curl http://127.0.0.1:7001/health -H "Authorization: Bearer <token>"
+```
+┌─────────────────────────────────────────────┐
+│  User                                      │
+└──────────────┬──────────────────────────────┘
+               │
+        ┌──────▼──────┐
+        │  Joomla 6   │◄── Admin Dashboard
+        │  Component  │◄── Frontend View
+        └──────┬──────┘
+               │ HTTP API
+        ┌──────▼──────┐
+        │  Python     │ Port 7001
+        │  FastAPI    │ Token-secured
+        │  Service    │
+        └──────┬──────┘
+               │ Docker API
+        ┌──────▼──────┐
+        │   Docker    │
+        │   Engine    │
+        └──────┬──────┘
+               │ Container ports
+        ┌──────▼──────┐
+        │    nginx    │ SSL Proxy
+        │  (9001+)    │ Wildcard cert
+        └─────────────┘
 ```
 
-### fsockopen Disabled
-Remove from `disable_functions` in php.ini:
+## ⚡ Quick Start
+
+### Prerequisites
+
+- Joomla 6.1+ with PHP 8.2+
+- Docker Engine 20.10+
+- Python 3.11+ with pip
+- nginx with SSL wildcard certificate
+
+### Installation
+
+1. **Install the Joomla component:**
+   ```bash
+   cd joomla-component
+   zip -r com_dockerhost.zip .
+   # Upload via Joomla Administrator → Extensions → Install
+   ```
+
+2. **Install Python API service:**
+   ```bash
+   cd dockerhost-api
+   pip install -r requirements.txt
+   # Configure .env with API_TOKEN
+   # Run: python main.py
+   # Or use systemd service
+   ```
+
+3. **Configure nginx SSL proxy:**
+   See docs/DOCKERHOST_DOCUMENTATION.md for complete nginx configuration.
+
+### Usage
+
+**Administrator:** https://yoursite.com/administrator/index.php?option=com_dockerhost
+
+1. Click "Deploy" in the sidebar
+2. Enter container name and Docker image
+3. Optional: Set container port, restart policy, env vars
+4. Click "Deploy Container"
+5. Container appears in list with SSL URL
+
+**Frontend:** https://yoursite.com/index.php?option=com_dockerhost
+
+- View-only container status
+- Click SSL "Open" button to access containers
+
+## 🔧 Configuration
+
+### API Service (.env)
 ```ini
-; Remove fsockopen from this line:
-; disable_functions = ...,fsockopen,...
+API_TOKEN=your-secure-token
+DOCKER_HOST=unix:///var/run/docker.sock
+NGINX_CONF=/etc/nginx/sites-available/yoursite
+SSL_CERT=/path/to/cert.pem
+SSL_KEY=/path/to/key.pem
+PORT_RANGE_START=9001
+PORT_RANGE_END=9100
 ```
 
-### Containers Not Appearing in List
-Check that `user_id` and `username` labels are being set during deployment.
+### Component Options
+- Set API URL and token in Administrator → DockerHost → Options
+- Configure user permissions for deploy access
 
----
+## 📚 Documentation
 
-## 🔒 Security Notes
-
-- **API Token:** Keep your `DOCKERHOST_TOKEN` secure. Use a strong random string.
-- **Firewall:** Only open ports 9001-9100 to the internet if containers need public access.
-- **SSL:** The wildcard certificate for your main domain is used for all container SSL ports.
-- **Permissions:** The API service runs as root to access Docker socket. Ensure the server is properly secured.
-
----
+- **[Full Documentation](docs/DOCKERHOST_DOCUMENTATION.md)** - Complete setup guide, API reference, troubleshooting
+- **[Changelog](#changelog)** - Version history
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Test on VPS before submitting PR
-4. Follow the existing code style
+This project is GPL-2.0+ licensed. Contributions welcome!
+
+## 📝 Changelog
+
+### v1.2.0 (2026-03-26)
+- ✅ Multi-user support with ownership labels
+- ✅ Automatic SSL proxy creation on deploy
+- ✅ Frontend ContainersController for AJAX actions
+- ✅ Simplified read-only frontend view
+- ✅ Fixed HTTP 500 errors (namespace, ApiHelper, menu items)
+- ✅ Updated component author to ymmude
+
+### v1.0.0 (2026-03-20)
+- Initial release with admin dashboard
+- Docker container management
+- SSL proxy support
 
 ---
 
-## 📄 License
-
-This project is licensed under the GNU General Public License v2.0 or later - see https://www.gnu.org/licenses/gpl-2.0.html for details.
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Credits
-
-Created by [Agent Zero](https://github.com/piknar) for Joomla 6 Docker container management.
-
----
-
-**⭐ Star this repo if you find it useful!**
+**Author:** ymmude  
+**License:** GPL-2.0+  
+**Repository:** https://github.com/piknar/jdockerhost
