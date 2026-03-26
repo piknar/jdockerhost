@@ -314,7 +314,7 @@ def deploy_container(req: DeployRequest, auth=Depends(verify_token)):
             environment=env_list,
             ports=port_bindings if req.port else None,
             restart_policy={"Name": req.restart_policy},
-            labels={"dockerhost": "true", "subdomain": req.subdomain or ""}
+            labels={"dockerhost": "true", "subdomain": req.subdomain or "", "user_id": str(req.user_id or 0), "username": req.username or ""}
         )
 
         # Reload to get assigned host port
